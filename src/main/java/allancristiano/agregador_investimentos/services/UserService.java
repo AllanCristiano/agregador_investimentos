@@ -1,6 +1,7 @@
 package allancristiano.agregador_investimentos.services;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -28,5 +29,10 @@ public class UserService {
         
         var usersaved = userRepositore.save(user);
         return usersaved.getUserId();
+    }
+
+    public Optional<User> getUserById(String userId){
+        var user = userRepositore.findById(UUID.fromString(userId));
+        return user;
     }
 }
