@@ -62,6 +62,7 @@ public class UserService {
             if (updateUserDto.username() != null) {
                 user.setUsername(updateUserDto.username());
             }
+            user.setUpdateTimesTamp(Instant.now());
             userRepositore.save(user);
         }
     }
