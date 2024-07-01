@@ -16,8 +16,8 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class UserService {
+    
     private UserRepositore userRepositore;
-
 
     public UUID createUser(CreateUserDto userDto){
         // Dto -> Entity
