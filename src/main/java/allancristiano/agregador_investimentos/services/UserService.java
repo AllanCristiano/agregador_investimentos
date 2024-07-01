@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import allancristiano.agregador_investimentos.entities.User;
 import allancristiano.agregador_investimentos.entities.dto.CreateUserDto;
+import allancristiano.agregador_investimentos.entities.dto.UpdateUserDto;
 import allancristiano.agregador_investimentos.repositories.UserRepositore;
 import lombok.AllArgsConstructor;
 
@@ -46,6 +47,22 @@ public class UserService {
         var userExists = userRepositore.existsById(UUID.fromString(userId));
         if (userExists) {
             userRepositore.deleteById(UUID.fromString(userId));
+        }
+    }
+
+    public void updateUserById(String userId, UpdateUserDto updateUserDto){
+        var id = UUID.fromString(userId);
+        var userEntity = userRepositore.findById(id);
+
+        if (userEntity.isPresent()) {
+            var user = userEntity.get();
+            if (updateUserDto.password() != null) {
+                user.setPassword(updateUserDto.password());
+            }
+            if (updateUserDto.username() != null) {
+                user.setUsername(updateUserDto.username());
+            }
+            userRepositore.save(user);
         }
     }
 }

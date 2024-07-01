@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import allancristiano.agregador_investimentos.entities.User;
 import allancristiano.agregador_investimentos.entities.dto.CreateUserDto;
+import allancristiano.agregador_investimentos.entities.dto.UpdateUserDto;
 import allancristiano.agregador_investimentos.services.UserService;
 import lombok.AllArgsConstructor;
 
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 
@@ -58,6 +61,11 @@ public class UserController {
         userService.deleteById(userId);
         return ResponseEntity.noContent().build();
     }
-    
+
+    @PutMapping("/{user_id}")
+    public ResponseEntity<Void> putMethodName(@PathVariable("user_id") String id, @RequestBody UpdateUserDto updateUserDto) {
+        userService.updateUserById(id, updateUserDto);        
+        return ResponseEntity.noContent().build();
+    }    
     
 }
