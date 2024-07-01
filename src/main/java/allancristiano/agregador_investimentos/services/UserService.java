@@ -33,8 +33,8 @@ public class UserService {
         return usersaved.getUserId();
     }
 
-    public Optional<User> getUserById(String userId){
-        var user = userRepositore.findById(UUID.fromString(userId));
+    public Optional<User> getUserById(String string){
+        var user = userRepositore.findById(UUID.fromString(string));
         return user;
     }
 
