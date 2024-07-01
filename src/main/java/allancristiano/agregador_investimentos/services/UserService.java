@@ -1,6 +1,7 @@
 package allancristiano.agregador_investimentos.services;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,5 +35,17 @@ public class UserService {
     public Optional<User> getUserById(String userId){
         var user = userRepositore.findById(UUID.fromString(userId));
         return user;
+    }
+
+
+    public List<User> listUsers(){
+        return userRepositore.findAll();
+    }
+
+    public void deleteById(String userId){
+        var userExists = userRepositore.existsById(UUID.fromString(userId));
+        if (userExists) {
+            userRepositore.deleteById(UUID.fromString(userId));
+        }
     }
 }
