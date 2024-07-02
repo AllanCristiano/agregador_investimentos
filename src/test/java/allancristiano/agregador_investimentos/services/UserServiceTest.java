@@ -5,10 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,34 +35,32 @@ public class UserServiceTest {
     @Mock
     private UserRepositore userRepositore;
     @InjectMocks
-    private UserService userService; 
+    private UserService userService;
     @Captor
     private ArgumentCaptor<User> userArgumentCaptor;
     @Captor
     private ArgumentCaptor<UUID> uuidArgumentCaptor;
 
     @Nested
-    class createUser{
+    class createUser {
         @Test
         @DisplayName("should  create a user with success")
-        void shouldCreateAUserWithSuccess(){
+        void shouldCreateAUserWithSuccess() {
             // Arrange
             var user = new User(
-                UUID.randomUUID(), 
-                "username", 
-                "email@email.com", 
-                "password", 
-                Instant.now(), 
-                null
-                );
+                    UUID.randomUUID(),
+                    "username",
+                    "email@email.com",
+                    "password",
+                    Instant.now(),
+                    null);
 
             doReturn(user).when(userRepositore).save(userArgumentCaptor.capture());
 
             var input = new CreateUserDto(
-                "username", 
-                "email@email.com", 
-                "password"
-                );
+                    "username",
+                    "email@email.com",
+                    "password");
             // Act
             var output = userService.createUser(input);
             // Assert
@@ -72,32 +74,30 @@ public class UserServiceTest {
 
         @Test
         @DisplayName("should throw exception when error occurs")
-        void shouldThrowExceptionWhenErrorOccurs(){
+        void shouldThrowExceptionWhenErrorOccurs() {
             doThrow(new RuntimeException()).when(userRepositore).save(any());
             var input = new CreateUserDto(
-                "username", 
-                "email@email.com", 
-                "password"
-                );
+                    "username",
+                    "email@email.com",
+                    "password");
 
             assertThrows(RuntimeException.class, () -> userService.createUser(input));
         }
     }
 
     @Nested
-    class getUserById{
+    class getUserById {
         @Test
         @DisplayName("should get user by id with success optional is present")
-        void shouldGetUserByIdWithSuccessWhenOptionalIsPresent(){
+        void shouldGetUserByIdWithSuccessWhenOptionalIsPresent() {
             // Arrange
             var user = new User(
-                UUID.randomUUID(), 
-                "username", 
-                "email@email.com", 
-                "password", 
-                Instant.now(), 
-                null
-                );
+                    UUID.randomUUID(),
+                    "username",
+                    "email@email.com",
+                    "password",
+                    Instant.now(),
+                    null);
             doReturn(Optional.of(user)).when(userRepositore).findById(uuidArgumentCaptor.capture());
             // act
             var output = userService.getUserById(user.getUserId().toString());
@@ -108,7 +108,7 @@ public class UserServiceTest {
 
         @Test
         @DisplayName("should get user by id with success optional is empty")
-        void shouldGetUserByIdWithSuccessWhenOptionalIsEmpty(){
+        void shouldGetUserByIdWithSuccessWhenOptionalIsEmpty() {
             // Arrange
             var userId = UUID.randomUUID();
             doReturn(Optional.empty()).when(userRepositore).findById(uuidArgumentCaptor.capture());
@@ -117,6 +117,72 @@ public class UserServiceTest {
             // assert
             assertTrue(output.isEmpty());
             assertEquals(userId, uuidArgumentCaptor.getValue());
+        }
+    }
+
+    @Nested
+    class listUsers {
+        @Test
+        @DisplayName("should return all users with success")
+        void shouldReturnAllUsersWithSuccess() {
+            // Arrange
+            var user = new User(
+                    UUID.randomUUID(),
+                    "username",
+                    "email@email.com",
+                    "password",
+                    Instant.now(),
+                    null);
+            doReturn(List.of(user)).when(userRepositore).findAll();
+            // Act
+            var output = userService.listUsers();
+            // Assert
+            assertNotNull(output);
+            assertEquals(1, output.size());
+        }
+    }
+
+    @Nested
+    class deleteById {
+        @Test
+        @DisplayName("should delete user with success when user exist")
+        void shouldDeleteUserWithSuccessWhenUserExist() {
+            UUID userId = UUID.randomUUID();
+
+            // Configure the mocks
+            doReturn(true).when(userRepositore).existsById(userId);
+            doNothing().when(userRepositore).deleteById(userId);
+
+            // Act
+            userService.deleteById(userId.toString());
+
+            // Assert
+            verify(userRepositore, times(1)).existsById(uuidArgumentCaptor.capture());
+            verify(userRepositore, times(1)).deleteById(uuidArgumentCaptor.capture());
+
+            var idList = uuidArgumentCaptor.getAllValues();
+            assertEquals(2, idList.size());
+            assertEquals(userId, idList.get(0));
+            assertEquals(userId, idList.get(1));
+
+            verify(userRepositore, times(1)).existsById(idList.get(0));
+            verify(userRepositore, times(1)).deleteById(idList.get(1));
+        }
+
+        @Test
+        @DisplayName("should not delete user when user does not exist")
+        void shouldNotDeleteUserWhenUserDoesNotExist() {
+            UUID userId = UUID.randomUUID();
+
+            // Configure the mocks
+            doReturn(false).when(userRepositore).existsById(userId);
+
+            // Act
+            userService.deleteById(userId.toString());
+
+            // Assert
+            verify(userRepositore, times(1)).existsById(userId);
+            verify(userRepositore, times(0)).deleteById(any(UUID.class));
         }
     }
 }
